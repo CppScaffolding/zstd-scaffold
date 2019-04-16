@@ -1,0 +1,4 @@
+## .gitignore file for zstd-scaffold
+
+## ignore folder fetched through gclient
+zstd
