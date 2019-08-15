@@ -1,16 +1,18 @@
--- scaffold geniefile for zstd
+-- package geniefile for zstd
 
 zstd_script = path.getabsolute(path.getdirectory(_SCRIPT))
 zstd_root = path.join(zstd_script, "zstd")
 
 zstd_includedirs = {
-	path.join(zstd_script, "config"),
 	zstd_root,
+	path.join(zstd_root, "lib"),
 }
 
+zstd_defines = {
+	--"ZSTD_LEGACY_SUPPORT=5",
+}
 zstd_libdirs = {}
 zstd_links = {}
-zstd_defines = {}
 
 ----
 return {
@@ -36,24 +38,47 @@ return {
 
 	_create_projects = function()
 
-project "zstd"
-	kind "StaticLib"
-	language "C++"
-	flags {}
+	group "thirdparty"
+	project "zstd"
+		kind "StaticLib"
+		language "C"
+		flags {}
 
-	includedirs {
-		zstd_includedirs,
-	}
+		configuration {}
 
-	defines {}
+		includedirs {
+			zstd_includedirs,
+			path.join(zstd_root, "lib", "common"),
+			path.join(zstd_root, "lib", "compress"),
+			path.join(zstd_root, "lib", "decompress"),
+			path.join(zstd_root, "lib", "dictBuilder"),
+			path.join(zstd_root, "lib", "legacy"),
+		}
 
-	files {
-		path.join(zstd_script, "config", "**.h"),
-		path.join(zstd_root, "**.h"),
-		path.join(zstd_root, "**.cpp"),
-	}
+		defines {
+			zstd_defines,
+			'XXH_NAMESPACE=ZSTD_',
+			'ZSTD_LEGACY_SUPPORT=0',
+			'BACKTRACE_ENABLE=0',
 
-end, -- _create_projects()
+			'ZSTD_MULTITHREAD',
+		}
+
+		files {
+			path.join(zstd_root, "**.h"),
+			path.join(zstd_root, "lib", "common", "*.c"),
+			path.join(zstd_root, "lib", "compress", "*.c"),
+			path.join(zstd_root, "lib", "decompress", "*.c"),
+			path.join(zstd_root, "lib", "dictBuilder", "*.c"),
+
+			path.join(zstd_root, "lib", "deprecated", "*.c"),
+			--path.join(zstd_root, "lib", "legacy", "*.c"),
+		}
+
+	build_c11()
+
+	---
+	end, -- _create_projects()
 }
 
 ---
